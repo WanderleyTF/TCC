@@ -1,0 +1,39 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+RF24 radio(9,10); // CE, CSN
+const byte address[6] = "00001";
+boolean estado_B1 = 0;
+boolean estado_B2 = 1;
+
+void setup() 
+  {
+  Serial.begin(9600);
+  radio.begin();
+  radio.openReadingPipe(0,address);  
+  radio.setPALevel(RF24_PA_MIN);
+  radio.startListening();
+  pinMode(2,OUTPUT);    // LED Verde
+  pinMode(3,OUTPUT);    // LED Vermelho
+  pinMode(7,OUTPUT);    // Relé
+  }
+void loop() 
+  {
+   if (radio.available()) 
+  {
+   delay (10);
+   radio.read(&estado_B1, sizeof(estado_B1));
+   digitalWrite(7,estado_B1);
+   digitalWrite(2,estado_B1);
+   digitalWrite(3,estado_B2);
+  }
+
+   if (estado_B1 == 1)       {
+       estado_B2 = 0;        }
+
+   if (digitalRead (2) == 0) {
+        estado_B1=1;
+        estado_B1=0;
+        digitalWrite (3, HIGH);
+}
+}
