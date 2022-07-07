@@ -1,0 +1,46 @@
+#include <SPI.h>
+#include <nRF24L01.h>
+#include <RF24.h>
+RF24 radio(9, 10); // CE, CSN ==> Instancia/cria o objeto Radio para que possamos trabalhar com ele.
+const byte address[6] = "00001";  //Cria um vetor constante para a escrita
+boolean estado_B1 = 0;
+boolean estado = 0;
+
+void setup() {
+  radio.begin();                  // Inicia a transmissão do sinal com o transceptor NRF24L01
+  radio.openWritingPipe(address); // Informa para o transceptor o endereço de escrita 
+  radio.setPALevel(RF24_PA_MIN);  // Define a potência de transmissão
+  radio.stopListening();          // Faz o rádio parar de ouvir dessa forma ele apenas transmite
+  pinMode(2,INPUT_PULLUP);        // Pino para o sensor de vazamento e/ou acionamento de segurança
+  pinMode(3,OUTPUT);              // Led indicativo do Fornecimento de gás 
+  pinMode(4,INPUT_PULLUP);        // Botão para Acionar a válvula
+  pinMode(5,OUTPUT);              // Led indicativo de sistema Desligado
+  pinMode(6,OUTPUT);              // Buzzer e LED indicando sistema bloqueando o gás
+
+}
+  int analog_a0=0;
+  void loop() {
+  radio.write(&estado_B1,sizeof(estado_B1));
+    
+    if (digitalRead(2)==0) {
+        estado = 1;
+        digitalWrite (3, LOW);
+        digitalWrite (5, HIGH);
+        //
+        digitalWrite (6, HIGH);
+        delay (10);        }          // Tempo para não haver perda de dados
+  
+    if (estado == 1)       {
+        estado_B1=0;       }
+  
+    if (digitalRead(4)==0) {
+        estado_B1=1;
+        estado=0;
+        digitalWrite (3, HIGH);
+        digitalWrite (5, LOW);
+        digitalWrite (6, LOW);
+        
+        delay (10);        }
+  
+        delay (10);
+  }
